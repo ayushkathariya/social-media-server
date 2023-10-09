@@ -14,7 +14,7 @@ const signupController = async (req, res) => {
 
     const oldUser = await User.findOne({ email, isVerified: true });
     if (oldUser) {
-      return res.status(409).json({ message: "User is already registered" });
+      return res.status(409).json({ message: "Email is already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

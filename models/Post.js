@@ -4,17 +4,17 @@ const postSchema = new Schema(
   {
     caption: {
       type: String,
-      required: true,
+      // required: true,
     },
     image: {
       publicId: String,
       url: String,
-      required: true,
+      // required: true,
     },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true,
     },
     likes: [
       {
