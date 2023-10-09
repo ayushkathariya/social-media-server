@@ -28,6 +28,6 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch (err) {
-    return res.status(403).json({ message: "Invalid access key" });
+    return res.status(403).json({ message: "Invalid Token" });
   }
 };
