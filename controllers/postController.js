@@ -33,7 +33,7 @@ const createPostController = async (req, res) => {
   }
 };
 
-const getPostByIdController = async (req, res) => {
+const getPostController = async (req, res) => {
   try {
     const { postId } = req.params;
     if (!postId) {
@@ -51,7 +51,7 @@ const getPostByIdController = async (req, res) => {
   }
 };
 
-const likePostByIdController = async (req, res) => {
+const likePostController = async (req, res) => {
   try {
     const { postId } = req.params;
     if (!postId) {
@@ -82,6 +82,6 @@ const likePostByIdController = async (req, res) => {
 
 module.exports = {
   createPostController,
-  getPostByIdController,
-  likePostByIdController,
+  getPostController,
+  likePostController,
 };
