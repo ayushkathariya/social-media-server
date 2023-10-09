@@ -2,20 +2,19 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
     },
     password: {
       type: String,
       required: true,
       select: false,
-    },
-    name: {
-      type: String,
-      required: true,
     },
     bio: {
       type: String,
@@ -24,28 +23,22 @@ const userSchema = new mongoose.Schema(
       publicId: String,
       url: String,
     },
-    followers: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
-      },
-    ],
-    followings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
-      },
-    ],
-    posts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "post",
-      },
-    ],
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verifyOTP: {
+      type: Number,
+      default: null,
+    },
+    verifyOTPExpiry: {
+      type: Date,
+      default: Date.now() + 300000,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("User", userSchema);

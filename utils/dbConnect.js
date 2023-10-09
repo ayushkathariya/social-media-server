@@ -5,6 +5,7 @@ module.exports = async () => {
     const connect = await mongoose.connect(process.env.MONGO_URL, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
+      dbName: "social_media",
     });
 
     console.log(`MongoDB connected: ${connect.connection.host}`);

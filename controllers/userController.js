@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const { error, success } = require("../utils/responseWrapper");
 
 const getMyProfile = async (req, res) => {
   try {
@@ -8,12 +7,12 @@ const getMyProfile = async (req, res) => {
     const curUser = await User.findById(curUserId);
 
     if (!curUser) {
-      return res.send(error(404, "User not found."));
+      return res.status(404).json({ message: "User not found." });
     }
 
-    return res.send(success(200, { curUser }));
-  } catch (e) {
-    return res.send(error(500, e.message));
+    return res.status(200).json({ curUser });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 

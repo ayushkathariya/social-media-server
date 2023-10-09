@@ -1,46 +1,61 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { error, success } = require("../utils/responseWrapper");
+const randomstring = require("randomstring");
+const nodemailer = require("nodemailer");
 
 const signupController = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!email || !password || !name) {
-      // return res.status(400).send("All fields are required");
-      return res.send(error(400, "All fields are required."));
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const oldUser = await User.findOne({ email });
+    const oldUser = await User.findOne({ email, isVerified: true });
     if (oldUser) {
-      // return res.status(409).send("User is already registered");
-      return res.send(error(409, "Email is already registered."));
+      return res.status(409).json({ message: "User is already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = randomstring.generate({
+      length: 6,
+      charset: "numeric",
+    });
 
-    const user = await User.create({
+    await User.create({
       name,
       email,
       password: hashedPassword,
+      verifyOTP: otp,
     });
 
-    const accessToken = generateAccessToken({
-      _id: user._id,
-    });
-    const refreshToken = generateRefreshToken({
-      _id: user._id,
-    });
-
-    res.cookie("jwt", refreshToken, {
-      httpOnly: true,
-      secure: true,
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MAIL_HOST,
+        pass: process.env.MAIL_PASS,
+      },
     });
 
-    return res.send(success(200, { accessToken }));
-  } catch (e) {
-    return res.send(error(500, e.message));
+    const mailOptions = {
+      from: process.env.MAIL_HOST,
+      to: email,
+      subject: "OTP Verification",
+      text: `Your otp verification code ${otp}. Dont't share it with others`,
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
+
+    return res.status(200).send({ message: `OTP sent to ${email}` });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 
@@ -49,107 +64,71 @@ const loginController = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      // return res.status(400).send("All fields are required");
-      return res.send(error(400, "All fields are required."));
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email, isVerified: true }).select(
+      "+password"
+    );
     if (!user) {
-      // return res.status(404).send("User is not registered");
-      return res.send(error(404, "Email is not registered."));
+      return res.status(401).json({ message: "Email is not registered" });
     }
 
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      // return res.status(403).send("Incorrect password");
-      return res.send(error(403, "Incorrect password"));
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
     const accessToken = generateAccessToken({
       _id: user._id,
     });
-    const refreshToken = generateRefreshToken({
-      _id: user._id,
-    });
 
-    res.cookie("jwt", refreshToken, {
-      httpOnly: true,
-      secure: true,
-    });
-
-    return res.send(success(200, { accessToken }));
-  } catch (e) {
-    return res.send(error(500, e.message));
+    return res.status(200).json({ accessToken });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 
-// this api will check the refreshToken validity and generate a new access token
-const refreshAccessTokenController = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies.jwt) {
-    // return res.status(401).send("Refresh token in cookie is required");
-    return res.send(error(401, "Refresh token in cookie is required"));
-  }
-
-  const refreshToken = cookies.jwt;
-
-  console.log("refressh", refreshToken);
-
+const verifyOTPController = async (req, res) => {
   try {
-    const decoded = jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_PRIVATE_KEY
-    );
+    const { email, otp } = req.body;
 
-    const _id = decoded._id;
-    const accessToken = generateAccessToken({ _id });
+    if (!email || !otp) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-    return res.send(success(201, { accessToken }));
-  } catch (e) {
-    console.log(e);
-    // return res.status(401).send("Invalid refresh token");
-    return res.send(error(401, "Invalid refresh token"));
-  }
-};
-
-const logoutController = async (req, res) => {
-  try {
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      secure: true,
+    const user = await User.findOne({
+      verifyOTP: otp,
+      verifyOTPExpiry: { $gt: Date.now() },
     });
-    return res.send(success(200, "Logged out successfully"));
-  } catch (e) {
-    return res.send(error(500, e.message));
+
+    if (user) {
+      user.isVerified = true;
+      user.verifyOTP = null;
+      user.verifyOTPExpiry = null;
+      await user.save();
+      return res.status(201).send({ message: "Signup Successful. Login !" });
+    } else {
+      return res.status(401).send({ message: "Invalid OTP" });
+    }
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 
-//internal functions
 const generateAccessToken = (data) => {
   try {
     const token = jwt.sign(data, process.env.ACCESS_TOKEN_PRIVATE_KEY, {
-      expiresIn: "10d",
+      expiresIn: "30d",
     });
     return token;
   } catch (error) {
-    console.log(error);
-  }
-};
-
-const generateRefreshToken = (data) => {
-  try {
-    const token = jwt.sign(data, process.env.REFRESH_TOKEN_PRIVATE_KEY, {
-      expiresIn: "1y",
-    });
-    return token;
-  } catch (error) {
-    console.log(error);
+    throw new Error(`Failed to generate access token: ${error}`);
   }
 };
 
 module.exports = {
   signupController,
   loginController,
-  refreshAccessTokenController,
-  logoutController,
+  verifyOTPController,
 };
