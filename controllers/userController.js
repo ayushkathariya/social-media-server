@@ -1,5 +1,10 @@
+const Post = require("../models/Post");
 const User = require("../models/User");
-const { userProfileWrapper, userWrapper } = require("../utils/responseWrapper");
+const {
+  userProfileWrapper,
+  userWrapper,
+  postsWrapper,
+} = require("../utils/responseWrapper");
 
 const getMyProfile = async (req, res) => {
   try {
@@ -129,7 +134,14 @@ const usersSuggestionController = async (req, res) => {
       followers: { $nin: req._id },
     });
 
-    return res.status(200).json({ users });
+    const wrappedUsers = users.map((user) => {
+      return {
+        user,
+        isFollowing: user.followers.includes(req._id),
+      };
+    });
+
+    return res.status(200).json({ users: wrappedUsers });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -137,13 +149,39 @@ const usersSuggestionController = async (req, res) => {
 
 const followingsSuggestionController = async (req, res) => {
   try {
+    const followingUsers = await User.find({ followers: { $in: req._id } });
+    const followingUsersId = followingUsers.map((user) => user._id.toString());
+    const posts = await Post.find({ user: { $in: followingUsersId } }).populate(
+      "user"
+    );
+    if (!posts) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const wrappedPosts = posts
+      .map((item) => postsWrapper(item, req._id))
+      .reverse();
+
+    return res.status(200).json({ posts: wrappedPosts });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+const followingUsersController = async (req, res) => {
+  try {
     const users = await User.find({
-      _id: { $nin: req._id },
       isVerified: true,
       followers: { $in: req._id },
     });
 
-    return res.status(200).json({ users });
+    const wrappedUsers = users.map((user) => {
+      return {
+        user,
+        isFollowing: user.followers.includes(req._id),
+      };
+    });
+    return res.status(200).json({ users: wrappedUsers });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
@@ -157,4 +195,5 @@ module.exports = {
   searchUserController,
   usersSuggestionController,
   followingsSuggestionController,
+  followingUsersController,
 };
