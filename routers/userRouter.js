@@ -6,9 +6,13 @@ const {
   followUserController,
   findFriendsController,
   searchUserController,
+  usersSuggestionController,
+  followingsSuggestionController,
 } = require("../controllers/userController");
 
 router.get("/me", requireUser, getMyProfile);
+router.get("/followings", requireUser, followingsSuggestionController);
+router.get("/suggestions", requireUser, usersSuggestionController);
 router.get("/search/:name", requireUser, searchUserController);
 router.get("/find-friends", requireUser, findFriendsController);
 router.get("/:userId", requireUser, getUser);

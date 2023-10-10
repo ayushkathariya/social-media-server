@@ -7,7 +7,6 @@ module.exports = async () => {
       useNewUrlParser: true,
       dbName: "social_media",
     });
-
     console.log(`MongoDB connected: ${connect.connection.host}`);
   } catch (error) {
     console.log(error);

@@ -121,10 +121,40 @@ const searchUserController = async (req, res) => {
   }
 };
 
+const usersSuggestionController = async (req, res) => {
+  try {
+    const users = await User.find({
+      _id: { $nin: req._id },
+      isVerified: true,
+      followers: { $nin: req._id },
+    });
+
+    return res.status(200).json({ users });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+const followingsSuggestionController = async (req, res) => {
+  try {
+    const users = await User.find({
+      _id: { $nin: req._id },
+      isVerified: true,
+      followers: { $in: req._id },
+    });
+
+    return res.status(200).json({ users });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getMyProfile,
   getUser,
   followUserController,
   findFriendsController,
   searchUserController,
+  usersSuggestionController,
+  followingsSuggestionController,
 };

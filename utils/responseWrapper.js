@@ -49,7 +49,7 @@ const userProfileWrapper = (user, userId) => {
     avatar: user.avatar,
     followersCount: user.followers.length,
     followingsCount: user.followings.length,
-    ifCurrentUser: user._id === userId,
+    ifCurrentUser: user._id.toString() === userId,
   };
 };
 
@@ -60,7 +60,8 @@ const userWrapper = (user, userId) => {
     avatar: user.avatar,
     followersCount: user.followers.length,
     followingsCount: user.followings.length,
-    ifCurrentUser: user._id === userId,
+    isFollowing: user.followers.includes(userId),
+    ifCurrentUser: user._id.toString() === userId,
     posts: user.posts.map((post) => {
       return {
         _id: post._id,
