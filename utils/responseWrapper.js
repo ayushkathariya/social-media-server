@@ -49,6 +49,7 @@ const userProfileWrapper = (user, userId) => {
     avatar: user.avatar,
     followersCount: user.followers.length,
     followingsCount: user.followings.length,
+    isFollowing: user.followers.includes(userId),
     ifCurrentUser: user._id.toString() === userId,
   };
 };
