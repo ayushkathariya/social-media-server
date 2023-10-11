@@ -13,7 +13,7 @@ const postsWrapper = (post, userId) => {
     likesCount: post.likes.length,
     commentsCount: post.comments.length,
     isLiked: post.likes.includes(userId),
-    timeAgo: ta.ago(post.createdAt),
+    timeAgo: ta.ago(post.createdAt, true),
   };
 };
 
@@ -31,14 +31,14 @@ const postsWrapperById = (post, userId) => {
       return {
         _id: item._id,
         comment: item.comment,
-        timeAgo: ta.ago(item.createdAt),
+        timeAgo: ta.ago(item.createdAt, true),
         user: item.user,
       };
     }),
     likesCount: post.likes.length,
     commentsCount: post.comments.length,
     isLiked: post.likes.includes(userId),
-    timeAgo: ta.ago(post.createdAt),
+    timeAgo: ta.ago(post.createdAt, true),
   };
 };
 
@@ -71,7 +71,7 @@ const userWrapper = (user, userId) => {
         likesCount: post.likes.length,
         commentsCount: post.comments.length,
         isLiked: post.likes.includes(userId),
-        timeAgo: ta.ago(post.createdAt),
+        timeAgo: ta.ago(post.createdAt, true),
         user: {
           _id: post.user._id,
           name: post.user.name,
