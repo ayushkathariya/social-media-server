@@ -1,5 +1,6 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const cloudinary = require("cloudinary").v2;
 const {
   userProfileWrapper,
   userWrapper,
@@ -187,6 +188,31 @@ const followingUsersController = async (req, res) => {
   }
 };
 
+const updateUserController = async (req, res) => {
+  try {
+    const { name, image } = req.body;
+
+    const user = await User.findById(req._id);
+
+    if (name) {
+      user.name = name;
+      await user.save();
+    }
+
+    if (image) {
+      const avatar = await cloudinary.uploader.upload(image, {
+        folder: "Avatars",
+      });
+      user.avatar = avatar.url;
+      await user.save();
+    }
+
+    return res.status(200).json({ message: "User updated successfully" });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getMyProfile,
   getUser,
@@ -196,4 +222,5 @@ module.exports = {
   usersSuggestionController,
   followingsSuggestionController,
   followingUsersController,
+  updateUserController,
 };

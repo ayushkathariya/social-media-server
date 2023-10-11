@@ -9,9 +9,11 @@ const {
   usersSuggestionController,
   followingsSuggestionController,
   followingUsersController,
+  updateUserController,
 } = require("../controllers/userController");
 
 router.get("/me", requireUser, getMyProfile);
+router.post("/update", requireUser, updateUserController);
 router.get("/followings", requireUser, followingsSuggestionController);
 router.get("/followings-user", requireUser, followingUsersController);
 router.get("/suggestions", requireUser, usersSuggestionController);
