@@ -57,8 +57,8 @@ const signupController = async (req, res) => {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  // port: 465,
+  secure: false,
   auth: {
     user: process.env.MAIL_HOST,
     pass: process.env.MAIL_PASS,
