@@ -1,9 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const dbConnect = require("./utils/dbConnect");
-const morgan = require("morgan");
+// const morgan = require("morgan");
+// const helmet = require("helmet");
 const cors = require("cors");
-const helmet = require("helmet");
 const cloudinary = require("cloudinary").v2;
 const authRouter = require("./routers/authRouter");
 const userRouter = require("./routers/userRouter");
@@ -23,8 +23,8 @@ cloudinary.config({
 
 //middlewares
 app.use(express.json({ limit: "10mb" }));
-app.use(morgan("common"));
-app.use(helmet());
+// app.use(morgan("common"));
+// app.use(helmet());
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
