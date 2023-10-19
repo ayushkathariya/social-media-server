@@ -32,6 +32,7 @@ const signupController = async (req, res) => {
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
+      host: process.env.MAIL_HOST,
       secure: false,
       auth: {
         user: process.env.MAIL_HOST,
