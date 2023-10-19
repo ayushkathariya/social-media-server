@@ -117,7 +117,7 @@ const searchUserController = async (req, res) => {
 
     const regex = new RegExp(name, "i");
 
-    const users = await User.find({ name: regex, _id: { $nin: req._id } });
+    const users = await User.find({ name: regex, _id: { $nin: req._id }, isVerified: true });
 
     const wrappedUsers = users.map((user) => userProfileWrapper(user, req._id));
 
