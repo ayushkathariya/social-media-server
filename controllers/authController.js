@@ -30,55 +30,31 @@ const signupController = async (req, res) => {
       verifyOTP: otp,
     });
 
-    // const transporter = nodemailer.createTransport({
-    //   service: "gmail",
-    //   auth: {
-    //     user: process.env.MAIL_HOST,
-    //     pass: process.env.MAIL_PASS,
-    //   },
-    // });
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      secure: false,
+      auth: {
+        user: process.env.MAIL_HOST,
+        pass: process.env.MAIL_PASS,
+      },
+    });
 
-    // const mailOptions = {
-    //   from: process.env.MAIL_HOST,
-    //   to: email,
-    //   subject: "OTP Verification",
-    //   text: `Your otp verification code ${otp}. Dont't share it with others`,
-    // };
-
-    // transporter.sendMail(mailOptions, function (error, info) {
-    //   if (error) {
-    //     console.log(error);
-    //   } else {
-    //     console.log("Email sent: " + info.response);
-    //   }
-    // });
-
-
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  // port: 465,
-  secure: false,
-  auth: {
-    user: process.env.MAIL_HOST,
-    pass: process.env.MAIL_PASS,
-  },
-});
-
-async function main() {
-  const info = await transporter.sendMail({
-    from: process.env.MAIL_HOST,
+    const mailOptions = {
+      from: process.env.MAIL_HOST,
       to: email,
       subject: "OTP Verification",
       text: `Your otp verification code ${otp}. Dont't share it with others`,
-  });
-  console.log("Message sent: %s", info.messageId);
-}
+    };
 
-main().catch(console.error);
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    });
 
-return res.status(200).send({ message: `OTP sent to ${email}` });
-
+    return res.status(200).send({ message: `OTP sent to ${email}` });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
