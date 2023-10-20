@@ -99,7 +99,6 @@ const verifyOTPController = async (req, res) => {
     }
 
     const user = await User.findOne({
-      email,
       verifyOTP: otp,
       verifyOTPExpiry: { $gt: Date.now() },
     });
