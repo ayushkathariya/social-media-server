@@ -33,7 +33,6 @@ const signupController = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       host: process.env.MAIL_HOST,
-      secure: false,
       auth: {
         user: process.env.MAIL_HOST,
         pass: process.env.MAIL_PASS,
@@ -50,12 +49,12 @@ const signupController = async (req, res) => {
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.log(error);
+        return res.status(500).json({ message: error.message });
       } else {
         console.log("Email sent: " + info.response);
+        return res.status(200).send({ message: `OTP sent to ${email}` });
       }
     });
-
-    return res.status(200).send({ message: `OTP sent to ${email}` });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
