@@ -22,7 +22,7 @@ cloudinary.config({
 });
 
 //middlewares
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "50mb" }));
 // app.use(morgan("common"));
 // app.use(helmet());
 app.use(
