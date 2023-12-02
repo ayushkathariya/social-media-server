@@ -124,7 +124,7 @@ const generateAccessToken = (data) => {
     });
     return token;
   } catch (error) {
-    throw new Error(`Failed to generate access token: ${error}`);
+    throw new Error(`Failed to generate access token`);
   }
 };
 

@@ -52,7 +52,7 @@ const userSchema = new Schema(
     },
     verifyOTPExpiry: {
       type: Date,
-      default: Date.now() + 300000,
+      default: () => Date.now() + 600000,
     },
   },
   {
